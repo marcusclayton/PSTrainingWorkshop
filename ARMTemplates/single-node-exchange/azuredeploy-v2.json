@@ -169,7 +169,7 @@
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('adSubnetName'))]",
+        "Microsoft.Resources/deployments/VNet",
         "[resourceId('Microsoft.Network/loadBalancers', variables('adLBName'))]"
       ],
       "properties": {
