@@ -41,7 +41,7 @@ Configuration JoinDomain
         xDSCDomainjoin JoinDomain
         {
             Domain = $DomainName
-            Credential = $Admincreds
+            Credential = $DomainCreds
             DependsOn = @("[xDisk]ADDataDisk")
         }
     }

@@ -11,6 +11,12 @@
     "vmSize": {
       "value": "Standard_DS2_v2"
     },
+    "subnetName": {
+      "value": "adSubnet"
+    },
+    "vnetName": {
+      "value": "adVNET"
+    },
     "domainName": {
       "value": "automation.ai"
     },
