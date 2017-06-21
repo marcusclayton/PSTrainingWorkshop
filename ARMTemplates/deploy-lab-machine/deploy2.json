@@ -1,0 +1,131 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newVMName": {
+      "type": "string",
+      "defaultValue": "win10lab-00"
+    },
+    "labName": {
+      "type": "string",
+      "defaultValue": "PSTrainingLab"
+    },
+    "size": {
+      "type": "string",
+      "defaultValue": "Standard_DS1_v2"
+    },
+    "userName": {
+      "type": "string",
+      "defaultValue": "lab"
+    },
+    "expirationDate": {
+      "type": "string",
+      "defaultValue": "2017-05-13T07:00:00.000Z"
+    },
+    "password": {
+      "type": "securestring",
+      "defaultValue": "[[[labadmin]]"
+    },
+    "Active_Directory_Domain_Join.domainName": {
+      "type": "string",
+      "defaultValue": "automation.ai"
+    },
+    "Active_Directory_Domain_Join.domainOU": {
+      "type": "string",
+      "defaultValue": "CN=Computers,DC=automation,DC=ai"
+    },
+    "Active_Directory_Domain_Join.domainJoinUser": {
+      "type": "string",
+      "defaultValue": "automation\\join"
+    },
+    "Active_Directory_Domain_Join.domainJoinUserPassword": {
+      "type": "securestring",
+      "defaultValue": "[[[joinpasswd]]"
+    },
+    "Active_Directory_Domain_Join.domainJoinOptions": {
+      "type": "string",
+      "defaultValue": "3"
+    }
+  },
+  "variables": {
+    "labSubnetName": "[concat(variables('labVirtualNetworkName'), 'Subnet')]",
+    "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
+    "labVirtualNetworkName": "[concat('Dtl', parameters('labName'))]",
+    "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
+    "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-05-15",
+      "type": "Microsoft.DevTestLab/labs/virtualmachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
+        "notes": "[HUB] Windows 10 Enterprise Preview",
+        "galleryImageReference": {
+          "offer": "Windows-HUB",
+          "publisher": "MicrosoftWindowsServer",
+          "sku": "Windows-10-HUB",
+          "osType": "Windows",
+          "version": "latest"
+        },
+        "size": "[parameters('size')]",
+        "userName": "[parameters('userName')]",
+        "password": "[parameters('password')]",
+        "isAuthenticationWithSshKey": false,
+        "artifacts": [
+          {
+            "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-domain-join')]",
+            "parameters": [
+              {
+                "name": "domainName",
+                "value": "[parameters('Active_Directory_Domain_Join.domainName')]"
+              },
+              {
+                "name": "domainOU",
+                "value": "[parameters('Active_Directory_Domain_Join.domainOU')]"
+              },
+              {
+                "name": "domainJoinUser",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinUser')]"
+              },
+              {
+                "name": "domainJoinUserPassword",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinUserPassword')]"
+              },
+              {
+                "name": "domainJoinOptions",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinOptions')]"
+              }
+            ]
+          },
+          {
+            "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-azurepowershell')]"
+          }
+        ],
+        "labSubnetName": "[variables('labSubnetName')]",
+        "disallowPublicIpAddress": true,
+        "storageType": "Premium",
+        "allowClaim": true,
+        "expirationDate": "[parameters('expirationDate')]",
+        "networkInterface": {
+          "sharedPublicIpAddressConfiguration": {
+            "inboundNatRules": [
+              {
+                "transportProtocol": "tcp",
+                "backendPort": 3389
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "labVMId": {
+      "type": "string",
+      "value": "[variables('vmId')]"
+    }
+  }
+}

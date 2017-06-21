@@ -1,0 +1,11 @@
+FirstName,LastName,MailDomain,SAM,OU,Password,Description
+LabUserBulk01,Last01,automation.ai,LLast01,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5678,one
+LabUserBulk02,Last02,automation.ai,LLast02,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5679,two
+LabUserBulk03,Last03,automation.ai,LLast03,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5680,one
+LabUserBulk04,Last04,automation.ai,LLast04,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5681,two
+LabUserBulk05,Last05,automation.ai,LLast05,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5682,one
+LabUserBulk06,Last06,automation.ai,LLast06,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5683,two
+LabUserBulk07,Last07,automation.ai,LLast07,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5684,one
+LabUserBulk08,Last08,automation.ai,LLast08,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5685,two
+LabUserBulk09,Last09,automation.ai,LLast09,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5686,one
+LabUserBulk10,Last10,automation.ai,LLast10,"OU=_NotMachines,DC=automation,DC=ai",P@ssword5687,two

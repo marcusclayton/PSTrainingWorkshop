@@ -1,0 +1,165 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newVMName": {
+      "type": "string",
+      "defaultValue": "lab-0"
+    },
+    "labName": {
+      "type": "string",
+      "defaultValue": "PSTrainingLab"
+    },
+    "size": {
+      "type": "string",
+      "defaultValue": "Standard_DS1_v2"
+    },
+    "userName": {
+      "type": "string",
+      "defaultValue": "labadmin"
+    },
+    "expirationDate": {
+      "type": "string",
+      "defaultValue": "2017-05-13T07:00:00.000Z"
+    },
+    "password": {
+      "type": "securestring",
+      "defaultValue": "[[[labadmin]]"
+    },
+    "Active_Directory_Domain_Join.domainName": {
+      "type": "string",
+      "defaultValue": "automation.ai"
+    },
+    "Active_Directory_Domain_Join.domainOU": {
+      "type": "string",
+      "defaultValue": "OU=_Machines,DC=automation,DC=ai"
+    },
+    "Active_Directory_Domain_Join.domainJoinUser": {
+      "type": "string",
+      "defaultValue": "automation\\join"
+    },
+    "Active_Directory_Domain_Join.domainJoinUserPassword": {
+      "type": "securestring",
+      "defaultValue": "[[[joinpasswd]]"
+    },
+    "Active_Directory_Domain_Join.domainJoinOptions": {
+      "type": "string",
+      "defaultValue": "3"
+    },
+    "Clone_a_git_repository.GitRepoURI": {
+      "type": "string",
+      "defaultValue": "https://github.com/marcusclayton/PSTrainingWorkshop.git"
+    },
+    "Clone_a_git_repository.Destination": {
+      "type": "string",
+      "defaultValue": "C:\\Repos"
+    },
+    "Clone_a_git_repository.Branch": {
+      "type": "string",
+      "defaultValue": "master"
+    },
+    "Clone_a_git_repository.PersonalAccessToken": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "labSubnetName": "DevTestLabs",
+    "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
+    "labVirtualNetworkName": "advnet",
+    "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
+    "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-04-26-preview",
+      "type": "Microsoft.DevTestLab/labs/virtualmachines",
+      "name": "[concat(variables('vmName'), padLeft(copyIndex(), 2, '0'))]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "[parameters('newVMName')]",
+        "count": 10
+      },
+      "properties": {
+        "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
+        "notes": "[HUB] Windows 10 Enterprise Preview",
+        "galleryImageReference": {
+          "offer": "Windows-HUB",
+          "publisher": "MicrosoftWindowsServer",
+          "sku": "Windows-10-HUB",
+          "osType": "Windows",
+          "version": "latest"
+        },
+        "size": "[parameters('size')]",
+        "userName": "[parameters('userName')]",
+        "password": "[parameters('password')]",
+        "isAuthenticationWithSshKey": false,
+        "artifacts": [
+          {
+            "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-domain-join')]",
+            "parameters": [
+              {
+                "name": "domainName",
+                "value": "[parameters('Active_Directory_Domain_Join.domainName')]"
+              },
+              {
+                "name": "domainOU",
+                "value": "[parameters('Active_Directory_Domain_Join.domainOU')]"
+              },
+              {
+                "name": "domainJoinUser",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinUser')]"
+              },
+              {
+                "name": "domainJoinUserPassword",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinUserPassword')]"
+              },
+              {
+                "name": "domainJoinOptions",
+                "value": "[parameters('Active_Directory_Domain_Join.domainJoinOptions')]"
+              }
+            ]
+          },
+          {
+            "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-azurepowershell')]"
+          },
+          {
+            "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-clone-git-repo')]",
+            "parameters": [
+              {
+                "name": "GitRepoURI",
+                "value": "[parameters('Clone_a_git_repository.GitRepoURI')]"
+              },
+              {
+                "name": "Destination",
+                "value": "[parameters('Clone_a_git_repository.Destination')]"
+              },
+              {
+                "name": "Branch",
+                "value": "[parameters('Clone_a_git_repository.Branch')]"
+              },
+              {
+                "name": "PersonalAccessToken",
+                "value": "[parameters('Clone_a_git_repository.PersonalAccessToken')]"
+              }
+            ]
+          }
+        ],
+        "labSubnetName": "[variables('labSubnetName')]",
+        "disallowPublicIpAddress": true,
+        "storageType": "Premium",
+        "allowClaim": true,
+        "expirationDate": "[parameters('expirationDate')]",
+        "networkInterface": {
+          "sharedPublicIpAddressConfiguration": {
+            "inboundNatRules": [
+              {
+                "transportProtocol": "tcp",
+                "backendPort": 3389
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
